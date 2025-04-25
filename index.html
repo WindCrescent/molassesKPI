@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de KPI de Fermentation de Mélasse</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        h1, h2, h3 {
+            color: #1e4d2b;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: none;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            background-color: #1e4d2b;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #1e4d2b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #143d1e;
+        }
+        
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #1e4d2b;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #1e4d2b;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .model-container {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        .flex-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .flex-item {
+            flex: 1;
+        }
+        
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #1e4d2b;
+            color: white;
+            text-align: center;
+            border-radius: 50%;
+            margin-left: 5px;
+            cursor: help;
+            font-size: 12px;
+            line-height: 16px;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculateur de KPI de Fermentation de Mélasse</h1>
+    
+    <div class="tabs">
+        <button class="tab active" data-tab="kpi">KPIs de Fermentation</button>
+        <button class="tab" data-tab="rendement">Analyse de Rendement</button>
+        <button class="tab" data-tab="modeles">Modèles du Marché</button>
+    </div>
+    
+    <div id="kpi" class="tab-content active">
+        <div class="container">
+            <h2>Calcul des KPIs de Fermentation</h2>
+            
+            <div class="form-group">
+                <label for="type-melasse">Type de Mélasse:</label>
+                <select id="type-melasse">
+                    <option value="canne">Mélasse de Canne à Sucre</option>
+                    <option value="betterave">Mélasse de Betterave</option>
+                    <option value="raffinage">Mélasse de Raffinage</option>
+                    <option value="blackstrap">Mélasse Blackstrap</option>
+                </select>
+            </div>
+            
+            <div class="flex-container">
+                <div class="flex-item">
+                    <div class="form-group">
+                        <label for="brix">Brix (°Bx) <span class="tooltip info-icon">i<span class="tooltiptext">Concentration totale de solides dissous</span></span>:</label>
+                        <input type="number" id="brix" placeholder="Ex: 80" min="0" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sucres-fermentescibles">Sucres Fermentescibles (%) <span class="tooltip info-icon">i<span class="tooltiptext">Pourcentage de sucres pouvant être fermentés</span></span>:</label>
+                        <input type="number" id="sucres-fermentescibles" placeholder="Ex: 50" min="0" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="volume-melasse">Volume de Mélasse (L):</label>
+                        <input type="number" id="volume-melasse" placeholder="Ex: 1000" min="0">
+                    </div>
+                </div>
+                
+                <div class="flex-item">
+                    <div class="form-group">
+                        <label for="temperature">Température de Fermentation (°C):</label>
+                        <input type="number" id="temperature" placeholder="Ex: 30" min="0" max="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ph">pH initial:</label>
+                        <input type="number" id="ph" placeholder="Ex: 5.5" min="0" max="14" step="0.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duree">Durée de Fermentation (heures):</label>
+                        <input type="number" id="duree" placeholder="Ex: 48" min="0">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="souche-levure">Souche de Levure:</label>
+                <select id="souche-levure">
+                    <option value="saccharomyces">Saccharomyces cerevisiae</option>
+                    <option value="schizosaccharomyces">Schizosaccharomyces pombe</option>
+                    <option value="kluyveromyces">Kluyveromyces marxianus</option>
+                    <option value="torulaspora">Torulaspora delbrueckii</option>
+                </select>
+            </div>
+            
+            <button id="calculer-kpi">Calculer les KPIs</button>
+            
+            <div id="resultats-kpi" class="result-container hidden">
+                <h3>Résultats des KPIs</h3>
+                
+                <table>
+                    <tr>
+                        <th>KPI</th>
+                        <th>Valeur</th>
+                        <th>Unité</th>
+                        <th>Évaluation</th>
+                    </tr>
+                    <tr>
+                        <td>Rendement en Alcool</td>
+                        <td id="rendement-alcool">-</td>
+                        <td>%</td>
+                        <td id="eval-rendement-alcool">-</td>
+                    </tr>
+                    <tr>
+                        <td>Productivité Volumétrique</td>
+                        <td id="productivite-volumetrique">-</td>
+                        <td>g/L/h</td>
+                        <td id="eval-productivite">-</td>
+                    </tr>
+                    <tr>
+                        <td>Taux de Conversion du Sucre</td>
+                        <td id="taux-conversion">-</td>
+                        <td>%</td>
+                        <td id="eval-conversion">-</td>
+                    </tr>
+                    <tr>
+                        <td>Taux de Viabilité des Levures</td>
+                        <td id="viabilite-levures">-</td>
+                        <td>%</td>
+                        <td id="eval-viabilite">-</td>
+                    </tr>
+                    <tr>
+                        <td>Production d'Éthanol Estimée</td>
+                        <td id="production-ethanol">-</td>
+                        <td>L</td>
+                        <td id="eval-production">-</td>
+                    </tr>
+                </table>
+                
+                <div class="chart-container">
+                    <canvas id="kpi-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="rendement" class="tab-content">
+        <div class="container">
+            <h2>Analyse de Rendement</h2>
+            
+            <div class="flex-container">
+                <div class="flex-item">
+                    <div class="form-group">
+                        <label for="cout-melasse">Coût de la Mélasse (€/tonne):</label>
+                        <input type="number" id="cout-melasse" placeholder="Ex: 200" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cout-energie">Coût Énergétique (€/kWh):</label>
+                        <input type="number" id="cout-energie" placeholder="Ex: 0.15" min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cout-main-oeuvre">Coût Main d'Œuvre (€/heure):</label>
+                        <input type="number" id="cout-main-oeuvre" placeholder="Ex: 20" min="0">
+                    </div>
+                </div>
+                
+                <div class="flex-item">
+                    <div class="form-group">
+                        <label for="prix-vente">Prix de Vente du Produit (€/L):</label>
+                        <input type="number" id="prix-vente" placeholder="Ex: 2.5" min="0" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="capacite-production">Capacité de Production (L/batch):</label>
+                        <input type="number" id="capacite-production" placeholder="Ex: 1000" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cycles-par-mois">Cycles de Production par Mois:</label>
+                        <input type="number" id="cycles-par-mois" placeholder="Ex: 10" min="0">
+                    </div>
+                </div>
+            </div>
+            
+            <button id="calculer-rendement">Calculer le Rendement</button>
+            
+            <div id="resultats-rendement" class="result-container hidden">
+                <h3>Résultats de l'Analyse de Rendement</h3>
+                
+                <table>
+                    <tr>
+                        <th>Indicateur</th>
+                        <th>Valeur</th>
+                        <th>Unité</th>
+                    </tr>
+                    <tr>
+                        <td>Coût Total par Batch</td>
+                        <td id="cout-total-batch">-</td>
+                        <td>€</td>
+                    </tr>
+                    <tr>
+                        <td>Coût par Litre de Produit</td>
+                        <td id="cout-par-litre">-</td>
+                        <td>€/L</td>
+                    </tr>
+                    <tr>
+                        <td>Marge Brute par Litre</td>
+                        <td id="marge-brute">-</td>
+                        <td>€/L</td>
+                    </tr>
+                    <tr>
+                        <td>ROI (Retour sur Investissement)</td>
+                        <td id="roi">-</td>
+                        <td>%</td>
+                    </tr>
+                    <tr>
+                        <td>Production Mensuelle</td>
+                        <td id="production-mensuelle">-</td>
+                        <td>L</td>
+                    </tr>
+                    <tr>
+                        <td>Revenu Mensuel</td>
+                        <td id="revenu-mensuel">-</td>
+                        <td>€</td>
+                    </tr>
+                </table>
+                
+                <div class="chart-container">
+                    <canvas id="rendement-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modeles" class="tab-content">
+        <div class="container">
+            <h2>Modèles de Fermentation sur le Marché</h2>
+            
+            <div class="model-container">
+                <h3>Fermentation Discontinue (Batch)</h3>
+                <p><strong>Description:</strong> Méthode traditionnelle où tous les ingrédients sont ajoutés au début et la fermentation se poursuit jusqu'à épuisement des sucres.</p>
+                <p><strong>Avantages:</strong> Simple à mettre en œuvre, faible investissement initial, flexibilité opérationnelle.</p>
+                <p><strong>Inconvénients:</strong> Productivité limitée, temps mort entre les lots, inhibition potentielle par les produits.</p>
+                <p><strong>Applications principales:</strong> Production d'alcool artisanal, petites distilleries, expérimentation.</p>
+                <p><strong>Rendement typique:</strong> 80-85% du rendement théorique.</p>
+                <p><strong>Coût d'investissement:</strong> €€ (Modéré)</p>
+            </div>
+            
+            <div class="model-container">
+                <h3>Fermentation Fed-Batch</h3>
+                <p><strong>Description:</strong> Le substrat est ajouté progressivement pendant la fermentation pour maintenir une concentration optimale de sucres.</p>
+                <p><strong>Avantages:</strong> Meilleure productivité que le batch, réduction de l'inhibition par le substrat, densité cellulaire plus élevée.</p>
+                <p><strong>Inconvénients:</strong> Contrôle plus complexe, équipement supplémentaire nécessaire.</p>
+                <p><strong>Applications principales:</strong> Production industrielle d'éthanol, distilleries de taille moyenne à grande.</p>
+                <p><strong>Rendement typique:</strong> 85-90% du rendement théorique.</p>
+                <p><strong>Coût d'investissement:</strong> €€€ (Modéré à élevé)</p>
+            </div>
+            
+            <div class="model-container">
+                <h3>Fermentation Continue</h3>
+                <p><strong>Description:</strong> Système en flux continu où le substrat est constamment ajouté et le produit retiré.</p>
+                <p><strong>Avantages:</strong> Productivité élevée, fonctionnement stable à long terme, réduction des temps morts.</p>
+                <p><strong>Inconvénients:</strong> Complexité opérationnelle, risque accru de contamination, investissement initial élevé.</p>
+                <p><strong>Applications principales:</strong> Production industrielle à grande échelle, bioraffineries.</p>
+                <p><strong>Rendement typique:</strong> 90-95% du rendement théorique.</p>
+                <p><strong>Coût d'investissement:</strong> €€€€ (Élevé)</p>
+            </div>
+            
+            <div class="model-container">
+                <h3>Fermentation Immobilisée</h3>
+                <p><strong>Description:</strong> Les micro-organismes sont fixés sur un support solide, permettant une réutilisation facile.</p>
+                <p><strong>Avantages:</strong> Densité cellulaire très élevée, réutilisation des cellules, résistance accrue aux conditions extrêmes.</p>
+                <p><strong>Inconvénients:</strong> Conception complexe, contraintes de transfert de masse, coût élevé.</p>
+                <p><strong>Applications principales:</strong> Production d'éthanol de haute qualité, biocarburants avancés.</p>
+                <p><strong>Rendement typique:</strong> 85-92% du rendement théorique.</p>
+                <p><strong>Coût d'investissement:</strong> €€€€€ (Très élevé)</p>
+            </div>
+            
+            <div class="model-container">
+                <h3>Fermentation à Membrane</h3>
+                <p><strong>Description:</strong> Utilisation de membranes perméables sélectives pour extraire continuellement le produit pendant la fermentation.</p>
+                <p><strong>Avantages:</strong> Réduction de l'inhibition par le produit, concentration du produit, rendements élevés.</p>
+                <p><strong>Inconvénients:</strong> Technologie avancée, coût élevé, entretien complexe.</p>
+                <p><strong>Applications principales:</strong> Production d'éthanol à haute concentration, bioraffineries avancées.</p>
+                <p><strong>Rendement typique:</strong> 92-97% du rendement théorique.</p>
+                <p><strong>Coût d'investissement:</strong> €€€€€ (Très élevé)</p>
+            </div>
+            
+            <div class="model-container">
+                <h3>Tableau Comparatif des Modèles</h3>
+                <table>
+                    <tr>
+                        <th>Modèle</th>
+                        <th>Rendement</th>
+                        <th>Investissement</th>
+                        <th>Complexité</th>
+                        <th>Échelle</th>
+                    </tr>
+                    <tr>
+                        <td>Batch</td>
+                        <td>80-85%</td>
+                        <td>Modéré</td>
+                        <td>Faible</td>
+                        <td>Petite à moyenne</td>
+                    </tr>
+                    <tr>
+                        <td>Fed-Batch</td>
+                        <td>85-90%</td>
+                        <td>Modéré à élevé</td>
+                        <td>Moyenne</td>
+                        <td>Moyenne à grande</td>
+                    </tr>
+                    <tr>
+                        <td>Continue</td>
+                        <td>90-95%</td>
+                        <td>Élevé</td>
+                        <td>Élevée</td>
+                        <td>Grande</td>
+                    </tr>
+                    <tr>
+                        <td>Immobilisée</td>
+                        <td>85-92%</td>
+                        <td>Très élevé</td>
+                        <td>Élevée</td>
+                        <td>Moyenne à grande</td>
+                    </tr>
+                    <tr>
+                        <td>À Membrane</td>
+                        <td>92-97%</td>
+                        <td>Très élevé</td>
+                        <td>Très élevée</td>
+                        <td>Grande</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script>
+        // Navigation par onglets
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-tab');
+                
+                // Désactiver tous les onglets et contenus
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Activer l'onglet et le contenu correspondant
+                tab.classList.add('active');
+                document.getElementById(target).classList.add('active');
+            });
+        });
+        
+        // Calcul des KPIs
+        document.getElementById('calculer-kpi').addEventListener('click', () => {
+            // Récupération des valeurs
+            const typeMelasse = document.getElementById('type-melasse').value;
+            const brix = parseFloat(document.getElementById('brix').value) || 0;
+            const sucresFermentescibles = parseFloat(document.getElementById('sucres-fermentescibles').value) || 0;
+            const volumeMelasse = parseFloat(document.getElementById('volume-melasse').value) || 0;
+            const temperature = parseFloat(document.getElementById('temperature').value) || 0;
+            const ph = parseFloat(document.getElementById('ph').value) || 0;
+            const duree = parseFloat(document.getElementById('duree').value) || 0;
+            const soucheLevure = document.getElementById('souche-levure').value;
+            
+            // Facteurs de correction selon le type de mélasse
+            let facteurRendement;
+            switch(typeMelasse) {
+                case 'canne':
+                    facteurRendement = 0.95;
+                    break;
+                case 'betterave':
+                    facteurRendement = 0.90;
+                    break;
+                case 'raffinage':
+                    facteurRendement = 0.85;
+                    break;
+                case 'blackstrap':
+                    facteurRendement = 0.80;
+                    break;
+                default:
+                    facteurRendement = 0.85;
+            }
+            
+            // Facteurs de correction selon la souche de levure
+            let facteurLevure;
+            switch(soucheLevure) {
+                case 'saccharomyces':
+                    facteurLevure = 1.0;
+                    break;
+                case 'schizosaccharomyces':
+                    facteurLevure = 0.95;
+                    break;
+                case 'kluyveromyces':
+                    facteurLevure = 0.9;
+                    break;
+                case 'torulaspora':
+                    facteurLevure = 0.85;
+                    break;
+                default:
+                    facteurLevure = 0.9;
+            }
+            
+            // Facteur de correction de température
+            const facteurTemperature = temperature >= 25 && temperature <= 35 ? 1.0 : 
+                                      temperature > 35 ? 0.85 : 0.8;
+            
+            // Facteur de correction de pH
+            const facteurPH = ph >= 4.5 && ph <= 5.5 ? 1.0 : 
+                             ph > 5.5 || ph < 4.0 ? 0.7 : 0.9;
+            
+            // Calcul des KPIs
+            const rendementAlcool = (sucresFermentescibles / 100) * facteurRendement * facteurLevure * facteurTemperature * facteurPH * 0.51 * 100;
+            
+            const sucreTotal = volumeMelasse * (brix / 100) * (sucresFermentescibles / 100);
+            const productiviteVolumetrique = (sucreTotal * facteurRendement * facteurLevure * facteurTemperature * facteurPH * 0.51) / (volumeMelasse * duree);
+            
+            const tauxConversion = facteurRendement * facteurLevure * facteurTemperature * facteurPH * 100;
+            
+            const viabiliteLevures = facteurLevure * facteurTemperature * facteurPH * 100;
+            
+            // Calcul de la production d'éthanol estimée
+            const rendementTheorique = 0.51; // 51% de sucre converti en éthanol
+            const productionEthanol = volumeMelasse * (brix / 100) * (sucresFermentescibles / 100) * rendementTheorique * facteurRendement * facteurLevure * facteurTemperature * facteurPH * 1.267; // 1.267 est un facteur de conversion pour obtenir des litres d'éthanol
+            
+            // Affichage des résultats
+            document.getElementById('rendement-alcool').textContent = rendementAlcool.toFixed(2);
+            document.getElementById('productivite-volumetrique').textContent = productiviteVolumetrique.toFixed(3);
+            document.getElementById('taux-conversion').textContent = tauxConversion.toFixed(2);
+            document.getElementById('viabilite-levures').textContent = viabiliteLevures.toFixed(2);
+            document.getElementById('production-ethanol').textContent = productionEthanol.toFixed(2);
+            
+            // Évaluation des KPIs
+            document.getElementById('eval-rendement-alcool').textContent = evaluerKPI(rendementAlcool, 80, 90);
+            document.getElementById('eval-productivite').textContent = evaluerKPI(productiviteVolumetrique, 1.5, 3);
+            document.getElementById('eval-conversion').textContent = evaluerKPI(tauxConversion, 75, 90);
+            document.getElementById('eval-viabilite').textContent = evaluerKPI(viabiliteLevures, 80, 95);
+            document.getElementById('eval-production').textContent = evaluerKPI(productionEthanol / volumeMelasse, 0.05, 0.1);
+            
+            document.getElementById('resultats-kpi').classList.remove('hidden');
+            
+            // Création du graphique
+            const ctx = document.getElementById('kpi-chart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Rendement Alcool', 'Productivité', 'Taux de Conversion', 'Viabilité des Levures', 'Production d\'Éthanol'],
+                    datasets: [{
+                        label: 'Performance',
+                        data: [
+                            normaliserValeur(rendementAlcool, 0, 100),
+                            normaliserValeur(productiviteVolumetrique, 0, 5),
+                            normaliserValeur(tauxConversion, 0, 100),
+                            normaliserValeur(viabiliteLevures, 0, 100),
+                            normaliserValeur(productionEthanol / volumeMelasse, 0, 0.2)
+                        ],
+                        backgroundColor: 'rgba(30, 77, 43, 0.2)',
+                        borderColor: 'rgba(30, 77, 43, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Calcul de rendement économique
+        document.getElementById('calculer-rendement').addEventListener('click', () => {
+            // Récupération des valeurs
+            const coutMelasse = parseFloat(document.getElementById('cout-melasse').value) || 0;
+            const coutEnergie = parseFloat(document.getElementById('cout-energie').value) || 0;
+            const coutMainOeuvre = parseFloat(document.getElementById('cout-main-oeuvre').value) || 0;
+            const prixVente = parseFloat(document.getElementById('prix-vente').value) || 0;
+            const capaciteProduction = parseFloat(document.getElementById('capacite-production').value) || 0;
+            const cyclesParMois = parseFloat(document.getElementById('cycles-par-mois').value) || 0;
+            
+            // Estimations des coûts
+            const coutMelasseParBatch = (coutMelasse / 1000) * (capaciteProduction * 0.2); // Estimation: 0.2 tonnes de mélasse par 1000L de capacité
+            const coutEnergieParBatch = (coutEnergie * 150) * (capaciteProduction / 1000); // Estimation: 150 kWh par 1000L de capacité
+            const coutMainOeuvreParBatch = coutMainOeuvre * 8 * (capaciteProduction / 1000); // Estimation: 8 heures de travail par 1000L
+            
+            // Coût total et indicateurs économiques
+            const coutTotalParBatch = coutMelasseParBatch + coutEnergieParBatch + coutMainOeuvreParBatch;
+            const coutParLitre = coutTotalParBatch / capaciteProduction;
+            const margeBrute = prixVente - coutParLitre;
+            const roi = (margeBrute / coutParLitre) * 100;
+            const productionMensuelle = capaciteProduction * cyclesParMois;
+            const revenuMensuel = productionMensuelle * prixVente;
+            
+            // Affichage des résultats
+            document.getElementById('cout-total-batch').textContent = coutTotalParBatch.toFixed(2);
+            document.getElementById('cout-par-litre').textContent = coutParLitre.toFixed(2);
+            document.getElementById('marge-brute').textContent = margeBrute.toFixed(2);
+            document.getElementById('roi').textContent = roi.toFixed(2);
+            document.getElementById('production-mensuelle').textContent = productionMensuelle.toFixed(0);
+            document.getElementById('revenu-mensuel').textContent = revenuMensuel.toFixed(2);
+            
+            document.getElementById('resultats-rendement').classList.remove('hidden');
+            
+            // Création du graphique
+            const ctx = document.getElementById('rendement-chart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Coût par Litre', 'Prix de Vente', 'Marge Brute'],
+                    datasets: [{
+                        label: 'Analyse Économique (€/L)',
+                        data: [coutParLitre, prixVente, margeBrute],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(75, 192, 192, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '€/L'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Fonctions utilitaires
+        function evaluerKPI(valeur, seuil1, seuil2) {
+            if (valeur >= seuil2) return 'Excellent';
+            if (valeur >= seuil1) return 'Bon';
+            return 'À améliorer';
+        }
+        
+        function normaliserValeur(valeur, min, max) {
+            return ((valeur - min) / (max - min)) * 100;
+        }
+    </script>
+</body>
+</html>
